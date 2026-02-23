@@ -1,0 +1,219 @@
+:root {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --primary-color: #bb86fc;
+    --text-color: #e0e0e0;
+    --secondary-text: #a0a0a0;
+    --border-color: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Login Overlay */
+#login-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.login-box {
+    background: var(--surface-color);
+    padding: 30px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.login-box input {
+    width: 90%;
+    margin: 10px 0;
+    padding: 10px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 5px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    background: var(--primary-color);
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* Layout */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.logout-btn {
+    background: transparent;
+    border: 1px solid #ff5555;
+    color: #ff5555;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--secondary-text);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: #000;
+    font-weight: bold;
+}
+
+/* Panels */
+.panel {
+    background: var(--surface-color);
+    padding: 20px;
+    border-radius: 8px;
+    min-height: 500px;
+}
+
+.upload-box {
+    background: var(--surface-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    border: 1px solid var(--border-color);
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 8px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 4px;
+}
+
+button {
+    background: var(--primary-color);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff; /* Added to ensure button text remains readable in both modes */
+}
+
+/* Feed & Posts */
+.feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.post {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: var(--secondary-text);
+    margin-bottom: 10px;
+}
+
+.tag-badge {
+    background: var(--bg-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.post img {
+    max-width: 100%;
+    border-radius: 5px;
+    display: block;
+}
+
+.post-caption {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+/* Comments Section within Post */
+.comments-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.comment-list {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.single-comment {
+    margin-bottom: 5px;
+}
+
+.comment-input-area {
+    display: flex;
+    gap: 5px;
+}
+
+.error-text { color: #ff5555; }
+.hint { color: #777; font-size: 0.8em; }
+
+/* --- LIGHT MODE VARIABLES --- */
+body.light-mode {
+    --bg-color: #f0f2f5;
+    --surface-color: #ffffff;
+    --primary-color: #6200ee;
+    --text-color: #121212;
+    --secondary-text: #555555;
+    --border-color: #cccccc;
+}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KV Store Client (EJS)</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+        .container { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .manager-zone { border: 2px solid #dc3545; background-color: #fff8f8; }
+        h2 { margin-top: 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        button { padding: 10px 20px; cursor: pointer; color: white; border: none; border-radius: 4px; }
+        .btn-put { background-color: #007BFF; }
+        .btn-get { background-color: #28a745; }
+        .btn-auth { background-color: #dc3545; }
+        .btn-auth:disabled { background-color: #e2e6ea; color: #333; cursor: not-allowed;}
+        
+        #result { margin-top: 10px; font-weight: bold; color: #333; font-size: 1.1em; }
+        .log { background: #f4f4f4; padding: 10px; font-family: monospace; height: 150px; overflow-y: scroll; border: 1px solid #ddd; }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>Key-Value Store (EJS View)</h1>
+
+    <div class="container">
+        <h2>Guest: Put Data</h2>
+        <input type="text" id="putKey" placeholder="Key (e.g., city)">
+        <input type="text" id="putValue" placeholder="Value (e.g., Kolkata)">
+        <button class="btn-put" onclick="sendPut()">Put Data</button>
+    </div>
+
+    <div class="container">
+        <h2>Guest: Get Data</h2>
+        <input type="text" id="getKey" placeholder="Key (e.g., city)">
+        <button class="btn-get" onclick="sendGet()">Get Data</button>
+    </div>
+
+    <div class="container manager-zone">
+        <h2>Manager Zone 🔒</h2>
+        
+        <div id="loginForm">
+            <label>Password:</label>
+            <input type="password" id="authPass" placeholder="Enter admin123">
+            <button class="btn-auth" onclick="sendAuth()">Login as Manager</button>
+        </div>
+
+        <div id="managerControls" class="hidden">
+            <p style="color:green; font-weight:bold;">✓ Access Granted</p>
+            <label>Target User IP:</label>
+            <input type="text" id="targetIp" placeholder="e.g., 127.0.0.1 or 192.168.x.x">
+            
+            <label>Target Key:</label>
+            <input type="text" id="managerKey" placeholder="Key to fetch">
+            
+            <button class="btn-auth" onclick="sendManagerGet()">Get User Data</button>
+        </div>
+    </div>
+
+    <h3>Result:</h3>
+    <div id="result">Waiting...</div>
+
+    <h3>Activity Log</h3>
+    <div class="log" id="activityLog"></div>
+
+    <script>
+        let managerToken = null;
+        const logBox = document.getElementById('activityLog');
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `> ${msg}`;
+            logBox.prepend(div);
+        }
+
+        async function sendPut() {
+            const key = document.getElementById('putKey').value;
+            const value = document.getElementById('putValue').value;
+            if(!key || !value) return alert("Enter Key and Value");
+
+            try {
+                const res = await fetch('/api/put', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value })
+                });
+                const data = await res.json();
+                log(`PUT ${key}=${value} : ${data.status}`);
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+
+        async function sendGet() {
+            const key = document.getElementById('getKey').value;
+            if(!key) return alert("Enter Key");
+
+            try {
+                const res = await fetch(`/api/get?key=${encodeURIComponent(key)}`);
+                const data = await res.json();
+                document.getElementById('result').textContent = data.value;
+                log(`GET (Self) ${key} : ${data.value}`);
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+
+        async function sendAuth() {
+            const password = document.getElementById('authPass').value;
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+                
+                if (data.status === "SUCCESS") {
+                    managerToken = data.token;
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('managerControls').classList.remove('hidden');
+                    log("Login Successful: You are Manager");
+                } else {
+                    alert("Wrong Password!");
+                    log("Login Failed");
+                }
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+
+        async function sendManagerGet() {
+            const targetIp = document.getElementById('targetIp').value;
+            const key = document.getElementById('managerKey').value;
+            
+            if(!targetIp || !key) return alert("Enter Target IP and Key");
+
+            try {
+                const res = await fetch(`/api/get?key=${encodeURIComponent(key)}&targetIp=${encodeURIComponent(targetIp)}`, {
+                    headers: { 'x-auth-token': managerToken }
+                });
+                const data = await res.json();
+                
+                if(res.status === 403) {
+                    document.getElementById('result').textContent = "ACCESS DENIED";
+                    log("Manager Access Denied");
+                } else {
+                    document.getElementById('result').textContent = data.value;
+                    log(`GET [${targetIp}] ${key} : ${data.value}`);
+                }
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "users": [
+    {
+      "username": "Kaka",
+      "password": "lala",
+      "tags": []
+    },
+    {
+      "username": "Srijit",
+      "password": "kaka",
+      "tags": [
+        "photography"
+      ]
+    }
+  ],
+  "posts": [
+    {
+      "id": 1771829964959,
+      "type": "public",
+      "room": null,
+      "username": "Kaka",
+      "imageUrl": "/uploads/1771829964956_Kaka.png",
+      "comment": "See this",
+      "tag": "general",
+      "comments": [
+        {
+          "username": "Srijit",
+          "text": "Wonderfull....",
+          "timestamp": 1771830005183
+        }
+      ]
+    },
+    {
+      "id": 1771830545782,
+      "type": "group",
+      "room": "JUPC",
+      "username": "Kaka",
+      "imageUrl": null,
+      "comment": "Hiii",
+      "tag": "general",
+      "comments": []
+    }
+  ]
+}

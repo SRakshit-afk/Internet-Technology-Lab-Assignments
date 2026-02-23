@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KV Store Terminal | Dark Mode</title>
+    <style>
+        /* Dark Theme Color Palette */
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #334155;
+            --neon-blue: #38bdf8;
+            --neon-green: #4ade80;
+            --neon-red: #f43f5e;
+            --input-bg: #020617;
+        }
+
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            max-width: 700px; 
+            margin: 2rem auto; 
+            padding: 0 1rem; 
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .container { 
+            background-color: var(--card-bg);
+            border: 1px solid var(--border); 
+            padding: 24px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .manager-zone { 
+            border: 1px solid var(--neon-red); 
+            background-color: #1a0a0c; /* Subtle red tint */
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.1);
+        }
+
+        h1 { text-align: center; color: var(--neon-blue); letter-spacing: -1px; margin-bottom: 2rem; }
+        h2 { margin-top: 0; font-size: 1.1rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        
+        label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; color: var(--text-dim); }
+        
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            box-sizing: border-box; 
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        button { 
+            width: 100%;
+            padding: 12px; 
+            cursor: pointer; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: 700;
+            transition: filter 0.2s, transform 0.1s;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-put { background-color: var(--neon-blue); color: #082f49; }
+        .btn-get { background-color: var(--neon-green); color: #064e3b; }
+        .btn-auth { background-color: var(--neon-red); }
+        
+        #result { 
+            margin-top: 10px; 
+            padding: 15px;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-weight: bold; 
+            color: var(--neon-green); 
+            font-family: monospace;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .log { 
+            background: #000; 
+            padding: 15px; 
+            font-family: 'Fira Code', 'Courier New', monospace; 
+            height: 180px; 
+            overflow-y: scroll; 
+            border: 1px solid var(--border); 
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: 0.85rem;
+        }
+
+        .log div { border-bottom: 1px solid #1e293b; padding: 4px 0; }
+        .log div:last-child { border: none; }
+
+        .hidden { display: none; }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1>NETWORK DATA NODE</h1>
+
+    <div class="container">
+        <h2>Guest: Write Command</h2>
+        <input type="text" id="putKey" placeholder="Identifier (Key)">
+        <input type="text" id="putValue" placeholder="Payload (Value)">
+        <button class="btn-put" onclick="sendPut()">Commit Data</button>
+    </div>
+
+    <div class="container">
+        <h2>Guest: Read Command</h2>
+        <input type="text" id="getKey" placeholder="Enter key to query">
+        <button class="btn-get" onclick="sendGet()">Retrieve Value</button>
+    </div>
+
+    <div class="container manager-zone">
+        <h2>Privileged Access Console 🔓</h2>
+        
+        <div id="loginForm">
+            <label>Master Password:</label>
+            <input type="password" id="authPass" placeholder="Enter Credentials">
+            <button class="btn-auth" onclick="sendAuth()">Authorize Manager</button>
+        </div>
+
+        <div id="managerControls" class="hidden">
+            <p style="color:var(--neon-green); font-weight:bold; font-size: 0.8rem; margin-bottom: 15px;">✓ PRIVILEGED SESSION ACTIVE</p>
+            <label>Remote Node IP:</label>
+            <input type="text" id="targetIp" placeholder="e.g., 127.0.0.1">
+            
+            <label>Target Key:</label>
+            <input type="text" id="managerKey" placeholder="Enter target key">
+            
+            <button class="btn-auth" onclick="sendManagerGet()">Remote Intercept</button>
+        </div>
+    </div>
+
+    <h3>Output Buffer</h3>
+    <div id="result">READY</div>
+
+    <h3>Traffic Log</h3>
+    <div class="log" id="activityLog"></div>
+
+    <script>
+        /** * Logic remains identical to original source 
+         * No changes made to functional behavior
+         */
+        let managerToken = null;
+        const logBox = document.getElementById('activityLog');
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logBox.prepend(div);
+        }
+
+        async function sendPut() {
+            const key = document.getElementById('putKey').value;
+            const value = document.getElementById('putValue').value;
+            if(!key || !value) return alert("Enter Key and Value");
+
+            try {
+                const res = await fetch('/api/put', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value })
+                });
+                const data = await res.json();
+                log(`PUT ${key} » ${data.status}`);
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+
+        async function sendGet() {
+            const key = document.getElementById('getKey').value;
+            if(!key) return alert("Enter Key");
+
+            try {
+                const res = await fetch(`/api/get?key=${encodeURIComponent(key)}`);
+                const data = await res.json();
+                document.getElementById('result').textContent = data.value;
+                log(`GET ${key} « ${data.value}`);
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+
+        async function sendAuth() {
+            const password = document.getElementById('authPass').value;
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+                
+                if (data.status === "SUCCESS") {
+                    managerToken = data.token;
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('managerControls').classList.remove('hidden');
+                    log("AUTH: Session elevated to Manager");
+                } else {
+                    alert("Authentication Failed");
+                    log("AUTH: Rejected");
+                }
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+
+        async function sendManagerGet() {
+            const targetIp = document.getElementById('targetIp').value;
+            const key = document.getElementById('managerKey').value;
+            
+            if(!targetIp || !key) return alert("Enter Target IP and Key");
+
+            try {
+                const res = await fetch(`/api/get?key=${encodeURIComponent(key)}&targetIp=${encodeURIComponent(targetIp)}`, {
+                    headers: { 'x-auth-token': managerToken }
+                });
+                
+                const data = await res.json();
+                
+                if(res.status === 403) {
+                    document.getElementById('result').textContent = "ACCESS_DENIED";
+                    log("SEC: Unauthorized remote access");
+                } else {
+                    document.getElementById('result').textContent = data.value;
+                    log(`QUERY: [${targetIp}] ${key} « ${data.value}`);
+                }
+            } catch (e) { log(`Error: ${e.message}`); }
+        }
+    </script>
+</body>
+</html>
